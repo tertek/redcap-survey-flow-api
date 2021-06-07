@@ -36,9 +36,6 @@ class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
     */
     private function renderModule() {
         
-        $this->includeJavascript();        
-        $this->includeCSS();        
-
         print '<p class="survey-queue-api">'.$this->helloFrom_surveyQueueApi().'<p>';
 
     }
@@ -63,34 +60,5 @@ class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
 
     }
 
-    
-   /**
-    * Include JavaScript files
-    *
-    */
-    private function includeJavascript() {
-        ?>
-        <script src="<?php print $this->getUrl('js/main.js'); ?>"></script>
-        <script> 
-            $(function() {
-                $(document).ready(function(){
-                    STPH_surveyQueueApi.init();
-                })
-            });
-        </script>
-        <?php
-    }
-    
-
-    
-   /**
-    * Include Style files
-    *
-    */
-    private function includeCSS() {
-        ?>
-        <link rel="stylesheet" href="<?= $this->getUrl('style.css')?>">
-        <?php
-    }
     
 }
