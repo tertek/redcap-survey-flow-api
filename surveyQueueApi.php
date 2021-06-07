@@ -3,12 +3,14 @@
 // Set the namespace defined in your config file
 namespace STPH\surveyQueueApi;
 
-
+require __DIR__ . '/vendor/autoload.php';
+use Firebase\JWT\JWT;
 
 // Declare your module class, which must extend AbstractExternalModule 
 class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
 
     private $moduleName = "Survey Queue API";  
+    private $JWTtoken = "";
 
    /**
     * Constructs the class
@@ -34,11 +36,8 @@ class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
     */
     private function renderModule() {
         
-        $this->includeJavascript();
-        
-        
-        $this->includeCSS();
-        
+        $this->includeJavascript();        
+        $this->includeCSS();        
 
         print '<p class="survey-queue-api">'.$this->helloFrom_surveyQueueApi().'<p>';
 
@@ -46,8 +45,20 @@ class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
 
     public function helloFrom_surveyQueueApi() {
 
+        $key = "example_key";
+        $payload = array(
+            "iss" => "http://example.org",
+            "aud" => "http://example.com",
+            "iat" => 1356999524,
+            "nbf" => 1357000000
+        );
+
+        
+        $jwt = JWT::encode($payload, $key);
+        $decoded = JWT::decode($jwt, $key, array('HS256'));
+
                 
-        return 'Hello from '.$this->moduleName;
+        return 'Token: '.$jwt;
         
 
     }
