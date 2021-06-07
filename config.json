@@ -25,7 +25,9 @@
 
     "links":{},
 
-    "no-auth-pages": [],
+    "no-auth-pages": [
+        "index"
+    ],
 
     "system-settings": [],
 
