@@ -4,6 +4,8 @@
 namespace STPH\surveyQueueApi;
 
 use RestUtility;
+use Survey;
+use Project;
 
 require __DIR__ . '/vendor/autoload.php';
 use Firebase\JWT\JWT;
@@ -11,11 +13,12 @@ use Firebase\JWT\JWT;
 // Declare your module class, which must extend AbstractExternalModule 
 class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
 
-    private $moduleName = "Survey Queue API";  
-    private $JWTtoken = "";
-
+    private $project_id;
     private $request;
     private $post;
+    private $record;
+
+    private $JWTtoken;
     private $jwt;
 
 
@@ -29,10 +32,12 @@ class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
        // Other code to run when object is instantiated
     }
 
-   /**
-    * Renders the module
-    *
-    */
+    // For Testing only
+
+    function redcap_every_page_top() {
+        //print_r(Survey::getProjectSurveyQueue());
+        //print_r(Survey::getSurveyQueueForRecord(1));
+    }
 
     public function generateToken() {
 
@@ -59,10 +64,24 @@ class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
 
     # Process Survey Queue API request as REDCap API request 
     # without REDCap API token (false) since we're using our own token
-    public function processTestingRequest() {
+    public function processSurveyQueueRequest() {  
 
         $this->request = RestUtility::processRequest(false);
         $this->post = $this->request->getRequestVars();
+
+        //  Check if request is valid
+        if(!isset($this->post['project_id'])){
+            RestUtility::sendResponse(400, "No project_id set.");
+        }
+
+        if(!isset($this->post['content']) || !isset($this->post['action'])) {
+            RestUtility::sendResponse(400, "No content and/or action set.");
+        }
+
+        //  IMPORTANT: Set project id, constants and globals that are necessary within REDCap Classes (e.g. Survey)
+        $this->project_id = $this->post['project_id'];
+        $GLOBALS["Proj"]  = new Project($this->project_id);
+        define("PROJECT_ID", $this->project_id);
 
         //$this->checkAuthentication();
         $this->handleEndpoint();
@@ -70,17 +89,20 @@ class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
     }
 
     protected function handleEndpoint() {
-        if(!isset($this->post['content']) || !isset($this->post['action'])) {
-            RestUtility::sendResponse(400, "No content and/or action set.");
-        }
+
+        $res = Survey::getSurveyQueueForRecord(1);
+
+        //$test = Survey::displaySurveyQueueForRecord(1);
 
         # Include endpoint to generate response
         //require ("endpoints/" . $this->post['content'] . "/" . $this->post['action']. ".php");
 
-        $this->response = "Hello World";
+        //  For Development on Localhost 
+        header('Access-Control-Allow-Origin: *'); 
+        header("Access-Control-Allow-Headers: Content-Type");
 
         # Return response
-        RestUtility::sendResponse(200, json_encode($this->response), 'json');
+        RestUtility::sendResponse(200, json_encode($res), 'json');
 
     }    
 
