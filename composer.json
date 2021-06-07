@@ -1,0 +1,6 @@
+{
+    "name": "tertek/survey_queue_api_v1.0.0",
+    "require": {
+        "firebase/php-jwt": "^5.3"
+    }
+}
