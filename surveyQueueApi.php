@@ -39,49 +39,58 @@ class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
         //print_r(Survey::getSurveyQueueForRecord(1));
     }
 
-    public function generateToken() {
+    private function generateToken($user) {
 
-        $key = "example_key";
+       /**  PHP package for JWT
+        *   https://github.com/firebase/php-jwt
+        *   
+        */
+
+        $secret = "example_key";
 
         $payload = array(
-            "iss" => "http://example.org",
-            "aud" => "http://example.com",
-            "iat" => 1356999524,
-            "nbf" => 1357000000
+            "iss" => "STPH",
+            "aud" => "STPH",
+            "user" => $user
         );
-
         
-        $jwt = JWT::encode($payload, $key);
-        $this->jwt = $jwt;
-
+        $jwt = JWT::encode($payload, $secret);
+        //$this->jwt = $jwt;
         //$decoded = JWT::decode($jwt, $key, array('HS256'));
-
                 
-        return 'Token: '.$jwt;
+        return $jwt;
         
 
     }
+
+    private function isValid($var) {
+        if( isset($var) && !empty($var)) {
+            return true;
+        }
+        return false;
+    }
+
 
     # Process Survey Queue API request as REDCap API request 
     # without REDCap API token (false) since we're using our own token
     public function processSurveyQueueRequest() {  
 
+        global $returnFormat; // Need to set this as global for RestUtility
+        $returnFormat = "json";
+
         $this->request = RestUtility::processRequest(false);
+
+        //  To Do: Escape && Sanitize vars before use
         $this->post = $this->request->getRequestVars();
 
-        //  Check if request is valid
-        if(!isset($this->post['project_id'])){
-            RestUtility::sendResponse(400, "No project_id set.");
+        if( !$this->isValid($this->post['node']) ) {
+            RestUtility::sendResponse(400, "Bad Request - node is required");
         }
 
-        if(!isset($this->post['content']) || !isset($this->post['action'])) {
-            RestUtility::sendResponse(400, "No content and/or action set.");
+        if( !$this->isValid($this->post['action']) ) {
+            RestUtility::sendResponse(400, "Bad Request - action is required");
         }
 
-        //  IMPORTANT: Set project id, constants and globals that are necessary within REDCap Classes (e.g. Survey)
-        $this->project_id = $this->post['project_id'];
-        $GLOBALS["Proj"]  = new Project($this->project_id);
-        define("PROJECT_ID", $this->project_id);
 
         //$this->checkAuthentication();
         $this->handleEndpoint();
@@ -89,17 +98,15 @@ class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
     }
 
     protected function handleEndpoint() {
-
-        $res = Survey::getSurveyQueueForRecord(1);
+        
+        //  For Development on Localhost 
+        header('Access-Control-Allow-Origin: *'); 
+        header("Access-Control-Allow-Headers: Content-Type");
 
         //$test = Survey::displaySurveyQueueForRecord(1);
 
         # Include endpoint to generate response
-        //require ("endpoints/" . $this->post['content'] . "/" . $this->post['action']. ".php");
-
-        //  For Development on Localhost 
-        header('Access-Control-Allow-Origin: *'); 
-        header("Access-Control-Allow-Headers: Content-Type");
+        require ("endpoints/" . $this->post['node'] . "." . $this->post['action']. ".php");
 
         # Return response
         RestUtility::sendResponse(200, json_encode($res), 'json');
