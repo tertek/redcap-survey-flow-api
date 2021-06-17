@@ -6,9 +6,10 @@
     }
 
     //  IMPORTANT: Set project id, constants and globals that are necessary within REDCap Classes (e.g. Survey)
-    $this->project_id = $this->post['project_id'];
+    $this->project_id = htmlspecialchars($this->post['project_id']);
     $GLOBALS["Proj"]  = new Project($this->project_id);
     define("PROJECT_ID", $this->project_id);
 
-    $res = Survey::getSurveyQueueForRecord(1);
+    //  Get record
 
+    $res = Survey::getSurveyQueueForRecord(1);

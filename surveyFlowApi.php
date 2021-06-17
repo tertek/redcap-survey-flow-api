@@ -39,6 +39,14 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
         //print_r(Survey::getSurveyQueueForRecord(1));
     }
 
+    public static $ACCEPTED_NODES = array(
+        'queue',
+        'token',
+        'test'
+    );
+
+
+
     private function generateToken($user) {
 
        /**  PHP package for JWT
@@ -80,7 +88,6 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
 
         $this->request = RestUtility::processRequest(false);
 
-        //  To Do: Escape && Sanitize vars before use
         $this->post = $this->request->getRequestVars();
 
         if( !$this->isValid($this->post['node']) ) {
@@ -91,10 +98,7 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
             RestUtility::sendResponse(400, "Bad Request - action is required");
         }
 
-
-        //$this->checkAuthentication();
         $this->handleEndpoint();
-        //$this->handleResponse();
     }
 
     protected function handleEndpoint() {
@@ -105,13 +109,22 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
 
         //$test = Survey::displaySurveyQueueForRecord(1);
 
-        # Include endpoint to generate response
-        require ("endpoints/" . $this->post['node'] . "." . $this->post['action']. ".php");
+        $endpoint_url = "endpoints/" . htmlspecialchars($this->post['node']) . "." . htmlspecialchars($this->post['action']). ".php";
+
+        //  Check if Endpoint is valid
+        if(file_exists($endpoint_url)) {
+            # Include endpoint to generate response
+            require ($endpoint_url);
+        } else {
+            RestUtility::sendResponse(400, "Bad Request - Invalid Endpoint.");
+        }
+
 
         # Return response
         RestUtility::sendResponse(200, json_encode($res), 'json');
 
-    }    
+    }
+
 
     
 }
