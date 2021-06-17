@@ -39,14 +39,6 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
         //print_r(Survey::getSurveyQueueForRecord(1));
     }
 
-    public static $ACCEPTED_NODES = array(
-        'queue',
-        'token',
-        'test'
-    );
-
-
-
     private function generateToken($user) {
 
        /**  PHP package for JWT
@@ -66,9 +58,7 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
         //$this->jwt = $jwt;
         //$decoded = JWT::decode($jwt, $key, array('HS256'));
                 
-        return $jwt;
-        
-
+        return $jwt;    
     }
 
     private function isValid($var) {
@@ -109,10 +99,11 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
 
         //$test = Survey::displaySurveyQueueForRecord(1);
 
-        $endpoint_url = "endpoints/" . htmlspecialchars($this->post['node']) . "." . htmlspecialchars($this->post['action']). ".php";
+        //$endpoint_url = "endpoints/" . htmlspecialchars($this->post['node']) . "." . htmlspecialchars($this->post['action']). ".php";
+        $endpoint_url = "endpoints/" . $this->post['node'] . "." . $this->post['action']. ".php";
 
         //  Check if Endpoint is valid
-        if(file_exists($endpoint_url)) {
+        if(file_exists(__DIR__ . "/" . $endpoint_url)) {
             # Include endpoint to generate response
             require ($endpoint_url);
         } else {
