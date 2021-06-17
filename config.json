@@ -1,9 +1,9 @@
 {
-    "name": "Survey Queue API",
+    "name": "Survey Flow API",
 
-    "namespace": "STPH\\surveyQueueApi", 
+    "namespace": "STPH\\surveyFlowApi", 
 
-    "description": "Another module made with create-redcap-module.",
+    "description": "A REDCap module to extend API for survey flow data.",
 
     "documentation": "README.md",
 

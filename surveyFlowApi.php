@@ -1,7 +1,7 @@
 <?php
 
 // Set the namespace defined in your config file
-namespace STPH\surveyQueueApi;
+namespace STPH\surveyFlowApi;
 
 use RestUtility;
 use Survey;
@@ -11,7 +11,7 @@ require __DIR__ . '/vendor/autoload.php';
 use Firebase\JWT\JWT;
 
 // Declare your module class, which must extend AbstractExternalModule 
-class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
+class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
 
     private $project_id;
     private $request;
@@ -71,9 +71,9 @@ class surveyQueueApi extends \ExternalModules\AbstractExternalModule {
     }
 
 
-    # Process Survey Queue API request as REDCap API request 
+    # Process Survey Flow API request as REDCap API request 
     # without REDCap API token (false) since we're using our own token
-    public function processSurveyQueueRequest() {  
+    public function processSurveyFlowRequest() {  
 
         global $returnFormat; // Need to set this as global for RestUtility
         $returnFormat = "json";
