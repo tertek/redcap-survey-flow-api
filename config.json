@@ -31,7 +31,28 @@
 
     "system-settings": [],
 
-    "project-settings": [],
+    "project-settings": [
+        {
+            "key": "id-field",
+            "name": "<b>ID Field</b><br>Used as user id for authentication",
+            "type": "field-list"
+        },
+        {
+            "key": "pass-field",
+            "name": "<b>Password Field</b><br>Used as password for authentication",
+            "type": "field-list"
+        },
+        {
+            "key": "firstname-field",
+            "name": "<b>Firstname Field</b><br>Shows firstname.",
+            "type": "field-list"
+        },
+        {
+            "key": "lastname-field",
+            "name": "<b>Lastname Field</b><br>Shows lastname.",
+            "type": "field-list"
+        } 
+    ],
 
     "crons": [],
 
