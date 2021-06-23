@@ -63,14 +63,14 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
 
         if ($this->post['preflight'] == true){
 
-            $res;
+            $projects;
             $project_ids = $this->getProjectsWithModuleEnabled();
 
             foreach ($project_ids as $key => $pid) {
 
                 $project = $this->getProject($pid); //8.11.10
 
-                $res[] = array(
+                $projects[] = array(
                     "project_id" => $pid,
                     "project_title" => $project->getTitle(), //  10.2.2,
                     "is_active" => $this->getProjectSetting('is-active', $pid)
@@ -79,9 +79,7 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
 
 
             $this->response = array(
-                "Message" => "Ok",
-                "module_enabled_pid" => $this->getProjectsWithModuleEnabled(),
-                "res" => $res
+                "projects" => $projects
             );
             # Return response
             RestUtility::sendResponse(200, json_encode($this->response), 'json');

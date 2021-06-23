@@ -1,4 +1,4 @@
-# Survey Queue API
+# Survey Flow API
 Another module made with create-redcap-module.
 
 ## Setup
