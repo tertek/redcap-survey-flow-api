@@ -120,6 +120,8 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
             "user_id" => $this->record[ $this->config['id'] ],
             "firstname" => $this->record[ $this->config['firstname'] ],
             "lastname" => $this->record[ $this->config['lastname'] ],
+            "exp" => time() + (60 * 60 * 24), //Expire the JWT after 24 hour from now
+
         );
     
         $this->jwt = JWT::encode( $payload, $secret, 'HS256' );
