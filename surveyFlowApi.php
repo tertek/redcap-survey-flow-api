@@ -61,6 +61,33 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
         $this->request = RestUtility::processRequest(false);
         $this->post = $this->request->getRequestVars();
 
+        if ($this->post['preflight'] == true){
+
+            $res;
+            $project_ids = $this->getProjectsWithModuleEnabled();
+
+            foreach ($project_ids as $key => $pid) {
+
+                $project = $this->getProject($pid); //8.11.10
+
+                $res[] = array(
+                    "project_id" => $pid,
+                    "project_title" => $project->getTitle(), //  10.2.2,
+                    "is_active" => $this->getProjectSetting('is-active', $pid)
+                );
+            }
+
+
+            $this->response = array(
+                "Message" => "Ok",
+                "module_enabled_pid" => $this->getProjectsWithModuleEnabled(),
+                "res" => $res
+            );
+            # Return response
+            RestUtility::sendResponse(200, json_encode($this->response), 'json');
+        }
+
+
         if( !$this->isValid($this->post['pid']) ) {
             RestUtility::sendResponse(400, "Bad Request - pid is required");
         }

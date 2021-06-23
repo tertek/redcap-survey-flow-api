@@ -33,6 +33,11 @@
 
     "project-settings": [
         {
+            "key": "is-active",
+            "name": "Active",
+            "type": "checkbox"
+        },
+        {
             "key": "id-field",
             "name": "<b>ID Field</b><br>Used as user id for authentication",
             "type": "field-list"
