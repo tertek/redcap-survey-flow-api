@@ -56,7 +56,11 @@
             "key": "lastname-field",
             "name": "<b>Lastname Field</b><br>Shows lastname.",
             "type": "field-list"
-        } 
+        },
+        {
+            "key": "custom-title",
+            "name": "Custom Title for your Project"
+        }
     ],
 
     "crons": [],

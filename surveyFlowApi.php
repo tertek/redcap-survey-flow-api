@@ -9,6 +9,7 @@ use Project;
 
 require __DIR__ . '/vendor/autoload.php';
 use Firebase\JWT\JWT;
+use Cocur\Slugify\Slugify;
 
 // Declare your module class, which must extend AbstractExternalModule 
 class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
@@ -16,6 +17,7 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
     private $request;
     private $response = array();
     private $project_id;
+    private $project_slug;
     private $config;
     private $post;
     private $record;
@@ -65,16 +67,23 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
 
             $projects;
             $project_ids = $this->getProjectsWithModuleEnabled();
+            
+            //  using external Slugify library to ensure localization differences are not causing problems on dev/prod
+            $slugify = new Slugify;
 
             foreach ($project_ids as $key => $pid) {
 
                 $project = $this->getProject($pid); //8.11.10
-
+                $customTitle = $this->getProjectSetting('custom-title', $pid);
+                $title = ( $customTitle == NULL ) ? $project->getTitle() : $customTitle;
+        
                 $projects[] = array(
-                    "project_id" => $pid,
-                    "project_title" => $project->getTitle(), //  10.2.2,
-                    "is_active" => $this->getProjectSetting('is-active', $pid)
+                    "id" => $pid,
+                    "title" => $title, //  10.2.2,
+                    "slug" => $slugify->slugify($title),                    
+                    "active" => $this->getProjectSetting('is-active', $pid)
                 );
+                
             }
 
 
@@ -86,14 +95,10 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
         }
 
 
+        //  Validate post parameters
         if( !$this->isValid($this->post['pid']) ) {
             RestUtility::sendResponse(400, "Bad Request - pid is required");
         }
-
-        //  IMPORTANT: Set project id necessary within REDCap Classes (e.g. Survey)
-        $this->project_id = htmlspecialchars($this->post['pid']);
-        define("PROJECT_ID", $this->project_id);
-        //$GLOBALS["Proj"]  = new Project($this->project_id);
 
         if( !$this->isValid($this->post['node']) ) {
             RestUtility::sendResponse(400, "Bad Request - node is required");
@@ -102,6 +107,19 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
         if( !$this->isValid($this->post['action']) ) {
             RestUtility::sendResponse(400, "Bad Request - action is required");
         }
+
+        //  Set important project relevant variables
+        $this->project_id = htmlspecialchars($this->post['pid']);       
+        //  IMPORTANT: Set global porject id which is necessary within some REDCap Classes (e.g. Survey)
+        define("PROJECT_ID", $this->project_id);
+        //$GLOBALS["Proj"]  = new Project($this->project_id);    
+        
+        $project = $this->getProject($this->project_id); //8.11.10
+
+        $customTitle = $this->getProjectSetting('custom-title');
+        $title = ( $customTitle == NULL ) ? $project->getTitle() : $customTitle;
+
+        $this->project_slug = (new Slugify)->slugify($title);
 
     }
 
@@ -123,12 +141,14 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
             RestUtility::sendResponse(500, "Invalid module configuration - lastname field is required.");
         }
 
+        //  Set configuration
         $this->config['id'] = $this->getProjectSetting("id-field");
         $this->config['pass'] = $this->getProjectSetting("pass-field");
         $this->config['firstname'] = $this->getProjectSetting("firstname-field");
         $this->config['lastname'] = $this->getProjectSetting("lastname-field");
     }
 
+    //  Check if post parameter is valid
     private function isValid($var) {
         if( isset($var) && !empty($var)) {
             return true;
@@ -142,10 +162,11 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
 
         $payload = array(
             "record_id" => $this->record[ "record_id" ],
-            "user_id" => $this->record[ $this->config['id'] ],
+            "user_id"   => $this->record[ $this->config['id'] ],
             "firstname" => $this->record[ $this->config['firstname'] ],
-            "lastname" => $this->record[ $this->config['lastname'] ],
-            "exp" => time() + (60 * 60 * 24), //Expire the JWT after 24 hour from now
+            "lastname"  => $this->record[ $this->config['lastname'] ],
+            "slug"      => $this->project_slug,
+            "exp"       => time() + (60 * 60 * 24), //Expire the JWT after 24 hour from now
 
         );
     
@@ -203,6 +224,6 @@ class surveyFlowApi extends \ExternalModules\AbstractExternalModule {
         # Return response
         RestUtility::sendResponse(200, json_encode($this->response), 'json');
 
-    }    
+    }
     
 }
